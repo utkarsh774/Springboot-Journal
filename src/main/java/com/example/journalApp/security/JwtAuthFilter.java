@@ -29,8 +29,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
+
+        // Skip JWT checks for authentication and health endpoints
+        return path.startsWith("/api/auth") || "/health".equals(path);
+
         // Skip JWT checks for authentication endpoints
         return path.startsWith("/api/auth");
+
     }
 
     @Override
