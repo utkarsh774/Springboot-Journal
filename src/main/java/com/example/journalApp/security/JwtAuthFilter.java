@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -25,17 +26,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Autowired
     private UserRepository userRepo;
 
-    // ✅ This skips filtering for /api/auth/* (login/register)
+    // ✅ Skip JWT checks for authentication endpoints
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-
-        // Skip JWT checks for authentication and health endpoints
-        return path.startsWith("/api/auth") || "/health".equals(path);
-
-        // Skip JWT checks for authentication endpoints
         return path.startsWith("/api/auth");
-
     }
 
     @Override
@@ -61,10 +56,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             if (user != null && jwtService.isTokenValid(jwt, user)) {
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(user, null, null);
+                        new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
