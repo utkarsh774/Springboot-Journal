@@ -31,6 +31,7 @@ public class AuthService {
             throw new RuntimeException("User already exists");
         } else {
             UserModel newUser = new UserModel();
+            newUser.setName(request.getUsername());
             newUser.setEmail(request.getEmail());
             newUser.setPassword(passwordEncoder.encode(request.getPassword()));
             userRepository.save(newUser);
