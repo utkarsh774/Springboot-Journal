@@ -1,10 +1,21 @@
 package com.example.journalApp.security;
 
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+
+import com.example.journalApp.Repository.UserRepository;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+
+
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,11 +31,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
+
     private final UserDetailsService userDetailsService;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, UserDetailsService userDetailsService) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
+
+    private final UserRepository userRepository;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, UserRepository userRepository) {
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.userRepository = userRepository;
+
     }
 
     @Bean
@@ -36,7 +55,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
+
                 .authenticationProvider(authenticationProvider())
+
+
+                .authenticationProvider(authenticationProvider())
+
+
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
@@ -51,11 +76,27 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
+
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
+
+
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService());
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    @Bean
+
+    public UserDetailsService userDetailsService() {
+        return username -> userRepository.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
 }
