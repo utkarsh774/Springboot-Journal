@@ -11,6 +11,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
+
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -38,6 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         String token = header.substring(7);
 
+
         String username;
         try {
             username = jwtService.extractUsername(token);
@@ -46,7 +51,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+
         String username = jwtService.extractUsername(token);
+
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -58,6 +65,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 userDetails.getAuthorities());
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
